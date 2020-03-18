@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from pydmd import DMD
 
 def getVideoFrames(filename, frames):
     framen = frames[1] - frames[0]
@@ -25,3 +26,16 @@ def getVideoFrames(filename, frames):
             matrix[fc-frames[0]] = vectorized
             fc+=1
     return matrix
+
+def frame_generator(filename, window):
+    frame_count = 0 
+    video = cv2.VideoCapture(filename)
+    total_frames = video.get(cv2.CAP_PROP_FRAME_COUNT)
+    while frame_count+window <= total_frames:
+        image_sequence = getVideoFrames(filename, (frame_count,frame_count+window))
+        yield image_sequence
+
+def getModes(sequence):
+    dmd = DMD(svd_rank=6)
+    dmd.fit(sequence.T)
+    return dmd.modes
