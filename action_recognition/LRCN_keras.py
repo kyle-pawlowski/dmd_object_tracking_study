@@ -58,9 +58,9 @@ def fit_model(model, train_data, test_data):
         if os.path.exists('LRCN_keras.h5'):
             model.load_weights('LRCN_keras.h5')
             print('Load weights')
-        train_generator = video_generator(train_data, BatchSize, seq_len=SequenceLength, img_size=IMSIZE,
+        train_generator = video_generator(train_data, BatchSize, seq_len=SequenceLength, input_shape=IMSIZE,
                                           num_classes=101)
-        test_generator = video_generator(test_data, BatchSize, seq_len=SequenceLength, img_size=IMSIZE, num_classes=101)
+        test_generator = video_generator(test_data, BatchSize, seq_len=SequenceLength, input_shape=IMSIZE, num_classes=101)
         print('Start fitting model')
         checkpointer = keras.callbacks.ModelCheckpoint('LRCN_weights.h5', save_weights_only=True)
         model.fit_generator(
@@ -78,9 +78,9 @@ def fit_model(model, train_data, test_data):
 
 
 if __name__ == '__main__':
-    data_dir = '/home/changan/ActionRocognition_rnn/data'
+    data_dir = 'C:/Users/Kyle/Documents/Research2/dmd_object_tracking_study/data/action_recognition'
     list_dir = os.path.join(data_dir, 'ucfTrainTestlist')
-    video_dir = os.path.join(data_dir, 'UCF-Preprocessed')
+    video_dir = os.path.join(data_dir, 'UCF-101')
 
     train_data, test_data, class_index = get_data_list(list_dir, video_dir)
     print('Train data size: ', len(train_data))
