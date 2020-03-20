@@ -3,7 +3,7 @@ from pydmd import DMD, MrDMD
 from PIL import Image
 from dmd_utils import getVideoFrames
 
-X = getVideoFrames('MOT16-09-raw.webm',(100,105))
+X = getVideoFrames('data/MOT16-09-raw.webm',(100,105))
 dmd = MrDMD(svd_rank=-1, max_level=3, max_cycles=1)
 print("X shape: " + str(X.T.shape))
 X = X.astype(np.float)

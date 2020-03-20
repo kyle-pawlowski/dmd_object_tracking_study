@@ -3,7 +3,7 @@ from pydmd import DMD
 from PIL import Image
 from dmd_utils import getVideoFrames
 
-X = getVideoFrames('MOT16-09-raw.webm',(100,105))
+X = getVideoFrames('data/MOT16-09-raw.webm',(100,105))
 dmd = DMD(svd_rank=6)
 print("X shape: " + str(X.T.shape))
 dmd.fit(X.T)

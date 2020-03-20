@@ -65,8 +65,8 @@ def fit_model(model, train_data, test_data):
         checkpointer = keras.callbacks.ModelCheckpoint('LRCN_weights.h5', save_weights_only=True)
         model.fit_generator(
             train_generator,
-            steps_per_epoch=4500,
-            epochs=20,
+            steps_per_epoch=100,
+            epochs=1,
             validation_data=test_generator,
             validation_steps=300,
             verbose=2,
@@ -78,7 +78,7 @@ def fit_model(model, train_data, test_data):
 
 
 if __name__ == '__main__':
-    data_dir = 'C:/Users/Kyle/Documents/Research2/dmd_object_tracking_study/data/action_recognition'
+    data_dir = '/home/kyle/Documents/Research/dmd_object_tracking_study/data/action_recognition'
     list_dir = os.path.join(data_dir, 'ucfTrainTestlist')
     video_dir = os.path.join(data_dir, 'UCF-101')
 
