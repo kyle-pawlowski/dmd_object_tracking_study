@@ -6,6 +6,8 @@ from dmd_utils import getVideoFrames
 X = getVideoFrames('data/MOT16-09-raw.webm',(100,105))
 dmd = DMD(svd_rank=6)
 print("X shape: " + str(X.T.shape))
+print("X avg: " + str(np.average(X)))
+X = X.astype(np.float64)
 dmd.fit(X.T)
 print(dmd.reconstructed_data.real.shape)
 print(dmd.modes.real.shape)
