@@ -1,7 +1,11 @@
 import numpy as np
+from numpy import dot, multiply, diag, power
+from numpy import pi, exp, sin, cos
+from numpy.linalg import inv, eig, pinv, solve
+from scipy.linalg import svd, svdvals
 import cv2
 from pydmd import DMD
-
+from math import floor, ceil
 def getVideoFrames(filename, frames,step=1):
     framen = int((frames[1] - frames[0])/step)+1
     video = cv2.VideoCapture(filename)
@@ -25,8 +29,6 @@ def getVideoFrames(filename, frames,step=1):
             vectorized = np.reshape(image, (frame_height*frame_width*3,))
             matrix[int((fc-frames[0])/step)] = vectorized
             fc+=1
-    matrix = matrix.astype(np.float64)
-    matrix = np.where(matrix==0,1,matrix)
     return matrix
 
 def frame_generator(filename, window):
@@ -42,6 +44,41 @@ def getModes(sequence):
     dmd.fit(sequence.T)
     return dmd.modes
 
+def shape_frames(frames,filename,size):
+    
+    writer = cv2.VideoWriter(filename,cv2.VideoWriter_fourcc(*'DIVX'),15,(960,540))
+    for frame in frames:
+        reshaped_frame = np.reshape(frame,size).astype(np.uint8)
+        recolored = np.concatenate((reshaped_frame[:,:,2:],reshaped_frame[:,:,1:2],reshaped_frame[:,:,0:1]),axis=2)
+        writer.write(recolored)
+    writer.release()
+
+def svht(X, sv=None):
+    # svht for sigma unknown
+    m,n = sorted(X.shape) # ensures m <= n
+    beta = m / n # ratio between 0 and 1
+    if sv is None:
+        sv = svdvals(X)
+    sv = np.squeeze(sv)
+    omega_approx = 0.56 * beta**3 - 0.95 * beta**2 + 1.82 * beta + 1.43
+    return np.median(sv) * omega_approx
+
+def dmd(X, Y, truncate=None):
+    if truncate == 0:
+        # return empty vectors
+        mu = np.array([], dtype='complex')
+        Phi = np.zeros([X.shape[0], 0], dtype='complex')
+    else:
+        U2,Sig2,Vh2 = svd(X, False) # SVD of input matrix
+        r = len(Sig2) if truncate is None else truncate # rank truncation
+        U = U2[:,:r]
+        Sig = diag(Sig2)[:r,:r]
+        V = Vh2.conj().T[:,:r]
+        Atil = dot(dot(dot(U.conj().T, Y), V), inv(Sig)) # build A tilde
+        mu,W = eig(Atil)
+        Phi = dot(dot(dot(Y, V), inv(Sig)), W) # build DMD modes
+    return mu, Phi
+
 def mrdmd(D, level=0, bin_num=0, offset=0, max_levels=7, max_cycles=2, do_svht=True):
     """Compute the multi-resolution DMD on the dataset `D`, returning a list of nodes
     in the hierarchy. Each node represents a particular "time bin" (window in time) at
@@ -56,10 +93,12 @@ def mrdmd(D, level=0, bin_num=0, offset=0, max_levels=7, max_cycles=2, do_svht=T
 
     # 4 times nyquist limit to capture cycles
     nyq = 8 * max_cycles
-
+    print("nyq= " + str(nyq))
     # time bin size
     bin_size = D.shape[1]
+    print("bin_size= " + str(bin_size))
     if bin_size < nyq:
+        print("bin_size < nyq")
         return []
 
     # extract subsamples 
